@@ -1,0 +1,59 @@
+Please follow the below steps:
+
+ 
+
+1.             Install-Module Microsoft.Graph -AllowClobber -Force
+
+2.             Connect-Graph -Scopes User.ReadWrite.All, Organization.Read.All
+
+3.             Get-MgSubscribedSku | select SkuPartNumber,skuID,ConsumedUnits
+
+ 
+
+ 
+
+To assign license to one user:
+ 
+
+Set-MgUserLicense -UserId “user@domain.com” -AddLicenses @{SkuId = "3018ae0e-ddcf-4ada-9692-40a1912c79c6"} -RemoveLicenses @()
+
+ 
+
+To remove license from one user:
+ 
+
+Set-MgUserLicense -UserId “user@domain.com” -RemoveLicenses 710779e8-3d4a-4c88-adb9-386c958d1fdf -AddLicenses @() -Confirm:$false
+
+ 
+To assign in bulk:
+ 
+
+$MF1Sku = Get-MgSubscribedSku -All | Where SkuPartNumber -eq 'M365_F1_COMM'
+
+$addLicenses = @{SkuId = $MF1Sku.SkuId}
+
+import-csv -path "D:\licenseMF1.csv" | Foreach {Set-MgUserLicense -UserId $_.UserPrincipalName -AddLicenses $addLicenses -RemoveLicenses @() }
+
+ 
+To unassign in bulk:
+ 
+
+$MF1Sku = Get-MgSubscribedSku -All | Where SkuPartNumber -eq 'M365_F1_COMM'
+
+import-csv -path "D:\licenseMF1.csv" | Foreach {Set-MgUserLicense -UserId $_.UserPrincipalName -AddLicenses @{} -RemoveLicenses @($MF1Sku.SkuId) }
+
+ 
+
+Excel file shoul be:
+
+UserPrincipalName
+User1@domain.com
+User2@domain.com
+User3@domain.com
+User4@domain.com
+User5@domain.com
+
+ 
+
+ 
+
